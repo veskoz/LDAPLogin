@@ -1,0 +1,42 @@
+<resources>
+
+    <string name="app_name">LDAPLogin</string>
+    <string name="username">username</string>
+    <string name="password">password</string>
+    <string name="login">LOGIN</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="status">Status</string>
+    <string name="save">Save</string>
+    <string name="password_dimenticata">Password dimenticata?</string>
+    <string name="reset_password">Reset password</string>
+    <string name="name">Name</string>
+    <string name="logging_in">Accesso in corso</string>
+    <string name="refreshlist">refreshList</string>
+    <string name="refresh">Aggiornamento in corso</string>
+
+    
+    <!-- Menu -->
+    <string name="settings">Impostazioni</string>
+
+    <!-- Default values for preferences -->
+    <string name="ldap_address_value">192.168.1.16</string>
+    <string name="ldap_port_value">389</string>
+    <string name="ldap_base_dn_value">dc=example,dc=com</string>
+    <string name="ldap_bind_dn_value">cn=Manager,dc=example,dc=com</string>
+    <string name="ldap_bind_password_value">passw0rd</string>
+    <string name="url_save_name_value">http://192.168.1.16/saveName.php</string>
+
+    <!-- Preference Titles -->
+    <string name="ldap">LDAP</string>
+
+    <!-- Messages Preferences -->
+    <string name="ldap_address">Indirizzo</string>
+    <string name="ldap_port">Porta</string>
+    <string name="ldap_base_dn">Base DN</string>
+    <string name="ldap_bind_dn">Bind DN</string>
+    <string name="ldap_bind_password">Password</string>
+    <string name="url_save_name">Pagina di destinazione</string>
+    <string name="acra_toast_text">L\'applicazione si è chiusa improvvisamente un report è stato inviato.</string>
+
+
+</resources>

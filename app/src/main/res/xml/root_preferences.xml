@@ -1,0 +1,43 @@
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        app:title="@string/ldap">
+        <EditTextPreference
+            app:key="ldap_address_key"
+            app:defaultValue="@string/ldap_address_value"
+            app:title="@string/ldap_address"
+            app:useSimpleSummaryProvider="true"
+            android:textColor="@color/colorWhite" />
+        <EditTextPreference
+            app:key="ldap_port_key"
+            app:defaultValue="@string/ldap_port_value"
+            app:title="@string/ldap_port"
+            app:useSimpleSummaryProvider="true"
+            android:textColor="@color/colorWhite" />
+        <EditTextPreference
+            app:key="ldap_base_dn_key"
+            app:defaultValue="@string/ldap_base_dn_value"
+            app:title="@string/ldap_base_dn"
+            app:useSimpleSummaryProvider="true"
+            android:textColor="@color/colorWhite" />
+        <EditTextPreference
+            app:key="ldap_bind_dn_key"
+            app:defaultValue="@string/ldap_bind_dn_value"
+            app:title="@string/ldap_bind_dn"
+            app:useSimpleSummaryProvider="true"
+            android:textColor="@color/colorWhite" />
+        <EditTextPreference
+            app:key="ldap_bind_password_key"
+            app:defaultValue="@string/ldap_bind_password_value"
+            app:title="@string/ldap_bind_password"
+            app:useSimpleSummaryProvider="true"
+            android:textColor="@color/colorWhite" />
+        <EditTextPreference
+            app:key="url_save_name_key"
+            app:defaultValue="@string/url_save_name_value"
+            app:title="@string/url_save_name"
+            app:useSimpleSummaryProvider="true"
+            android:textColor="@color/colorWhite" />
+    </PreferenceCategory>
+</PreferenceScreen>
