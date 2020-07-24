@@ -25,7 +25,7 @@
     <string name="ldap_base_dn_value">dc=example,dc=com</string>
     <string name="ldap_bind_dn_value">cn=Manager,dc=example,dc=com</string>
     <string name="ldap_bind_password_value">passw0rd</string>
-    <string name="url_save_name_value">http://192.168.1.16/saveName.php</string>
+    <string name="url_save_name_value">http://192.168.1.16/LDAPLogin_Server/saveName.php</string>
 
     <!-- Preference Titles -->
     <string name="ldap">LDAP</string>
