@@ -282,7 +282,6 @@ public class MainActivity extends AppCompatActivity {
                 .setDisplay(Display.NOTIFICATION)
                 .setUpdateFrom(UpdateFrom.GITHUB)
                 .setGitHubUserAndRepo("veskoz", "LDAPLogin")
-                .showEvery(5)
                 .setTitleOnUpdateAvailable("Aggiornamento disponibile")
                 .setContentOnUpdateAvailable("Un aggiornamento è disponibile!")
                 .setTitleOnUpdateNotAvailable("Aggiornamento non disponibile")

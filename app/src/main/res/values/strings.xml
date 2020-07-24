@@ -16,6 +16,7 @@
 
     <!-- Menu -->
     <string name="settings">Impostazioni</string>
+    <string name="update">Aggiorna</string>
 
     <!-- Default values for preferences -->
     <string name="ldap_address_value">192.168.1.16</string>
@@ -35,6 +36,5 @@
     <string name="ldap_bind_dn">Bind DN</string>
     <string name="ldap_bind_password">Password</string>
     <string name="url_save_name">Pagina di destinazione</string>
-    <string name="update">Aggiorna</string>
 
 </resources>
