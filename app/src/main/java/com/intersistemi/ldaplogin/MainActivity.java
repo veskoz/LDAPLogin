@@ -25,6 +25,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
+import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.javiersantos.appupdater.enums.Display;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
@@ -82,9 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Setting default values
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false);
-
-        editTextUsername.setText("avescovi");
-        editTextPassword.setText("12345678");
 
         imageButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.action_update:
-                startActivity(new Intent(MainActivity.this, UpdateActivity.class));
+                update();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -284,5 +284,44 @@ public class MainActivity extends AppCompatActivity {
                 Constants.PERMISSION_REQUEST_CODE);
     }
 
+    /**
+     * Method to update app from github
+     */
+    private void update() {
+        AppUpdater appUpdater = new AppUpdater(this)
+                .setDisplay(Display.NOTIFICATION)
+                .setUpdateFrom(UpdateFrom.GITHUB)
+                .setGitHubUserAndRepo("veskoz", "LDAPLogin")
+                .showEvery(5)
+                .setTitleOnUpdateAvailable("Aggiornamento disponibile")
+                .setContentOnUpdateAvailable("Un aggiornamento è disponibile!")
+                .setTitleOnUpdateNotAvailable("Aggiornamento non disponibile")
+                .setContentOnUpdateNotAvailable("Non ci sono aggiornamenti disponibili al momento")
+                .setButtonUpdate("Aggiornare ora?")
+                .setButtonUpdateClickListener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .setButtonDismiss("Forse più tardi")
+                .setButtonDismissClickListener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .setButtonDoNotShowAgain("L'aggiornamento è da eseguire.")
+                .setButtonDoNotShowAgainClickListener(new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .setIcon(R.drawable.ic_update_black_24dp) // Notification icon
+                .setCancelable(false) // Dialog could not be dismissable
+                ;
+        appUpdater.start();
+    }
 
 }//class
