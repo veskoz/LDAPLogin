@@ -3,8 +3,10 @@ package com.intersistemi.ldaplogin;
 import android.app.Application;
 import android.content.Context;
 
-import org.acra.*;
-import org.acra.annotation.*;
+import org.acra.ACRA;
+import org.acra.annotation.AcraCore;
+import org.acra.annotation.AcraHttpSender;
+import org.acra.annotation.AcraToast;
 import org.acra.data.StringFormat;
 import org.acra.sender.HttpSender;
 
@@ -25,7 +27,6 @@ public class AcraApplication extends Application {
 
         // The following line triggers the initialization of ACRA
         ACRA.init(this);
-        ACRA.DEV_LOGGING = true;
-
+        //ACRA.DEV_LOGGING = true;
     }
 }

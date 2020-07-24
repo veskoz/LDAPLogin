@@ -9,12 +9,11 @@
     <string name="save">Save</string>
     <string name="password_dimenticata">Password dimenticata?</string>
     <string name="reset_password">Reset password</string>
-    <string name="name">Name</string>
+    <string name="sample">Sample</string>
     <string name="logging_in">Accesso in corso</string>
-    <string name="refreshlist">refreshList</string>
-    <string name="refresh">Aggiornamento in corso</string>
+    <string name="refreshlist">Aggiornamento</string>
+    <string name="acra_toast_text">L\'applicazione si è chiusa improvvisamente un report è stato inviato.</string>
 
-    
     <!-- Menu -->
     <string name="settings">Impostazioni</string>
 
@@ -36,7 +35,6 @@
     <string name="ldap_bind_dn">Bind DN</string>
     <string name="ldap_bind_password">Password</string>
     <string name="url_save_name">Pagina di destinazione</string>
-    <string name="acra_toast_text">L\'applicazione si è chiusa improvvisamente un report è stato inviato.</string>
-
+    <string name="update">Aggiorna</string>
 
 </resources>

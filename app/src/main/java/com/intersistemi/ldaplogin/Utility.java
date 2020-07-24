@@ -50,13 +50,17 @@ public class Utility {
         return context.deleteDatabase(DatabaseHelper.DB_NAME);
     }
 
-    /*
-     * method taking two arguments
-     * name that is to be saved and id of the name from SQLite
-     * if the name is successfully sent
-     * we will update the status as synced in SQLite
-     * */
-    public void saveName(final int id, final String barcode, String ldap_user, long time, String url, DatabaseHelper db) {
+    /**
+     * method that try to save the sample to server and sync status
+     *
+     * @param id        id to save
+     * @param barcode   barcode to save
+     * @param ldap_user ldap_user to save
+     * @param time      time to save
+     * @param url       url of the php page to save samples
+     * @param db        local database
+     */
+    public void saveSample(final int id, final String barcode, String ldap_user, long time, String url, DatabaseHelper db) {
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
@@ -65,7 +69,7 @@ public class Utility {
                             JSONObject obj = new JSONObject(response);
                             if (!obj.getBoolean("error")) {
                                 //updating the status in sqlite
-                                db.updateNameStatus(id, Constants.NAME_SYNCED_WITH_SERVER, ldap_user, time);
+                                db.updateSampleStatus(id, Constants.NAME_SYNCED_WITH_SERVER);
 
                                 //sending the broadcast to refresh the list
                                 context.sendBroadcast(new Intent(Constants.DATA_SAVED_BROADCAST));
@@ -78,7 +82,6 @@ public class Utility {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("TAG", error.getMessage());
                     }
                 }) {
             @Override
@@ -94,6 +97,14 @@ public class Utility {
         VolleySingleton.getInstance(context).addToRequestQueue(stringRequest);
     }
 
+    /**
+     * Loop the list and try to save data (by calling saveSample)
+     * on the server and sync status
+     *
+     * @param db  local db
+     * @param url url to the php save that saves to the server's db
+     * @param url url to the php save that saves to the server's db
+     */
     public void iterateList(DatabaseHelper db, String url) {
         ConnectivityManager cm = (ConnectivityManager) this.context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -103,18 +114,18 @@ public class Utility {
             //if connected to wifi or mobile data plan
             if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI || activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
 
-                //getting all the unsynced names
-                try (Cursor cursor = db.getUnsyncedNames()) {
+                //getting all the unsynced samples
+                try (Cursor cursor = db.getUnsyncedSamples()) {
                     while (cursor.moveToNext()) {
 
-                        //calling the method to save the unsynced name to MySQL
-                        Log.d("TAG", " calling the method to save the unsynced name to MySQL");
-                        saveName(
+                        //calling the method to save the unsynced sample to MySQL
+                        Log.d("TAG", " calling the method to save the unsynced sample to MySQL");
+                        saveSample(
                                 cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID)),
                                 cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_BARCODE)),
                                 cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_LDAP_USER)),
                                 cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_TIME)),
-                                url,db
+                                url, db
                         );
                     }
                 }

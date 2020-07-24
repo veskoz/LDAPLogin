@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,24 +32,31 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchScope;
 
-import static com.intersistemi.ldaplogin.Constants.LOG_TAG_MainActivity;
 import static com.intersistemi.ldaplogin.Constants.PERMISSION_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity {
 
+    //dn of the user logged in
     private static String dn;
+    //progress dialog to show when user want to log in
     public ProgressDialog progressDialog;
+    //variables holding values of prefernces
     public String pref_address, pref_base_dn, pref_url_save_name, pref_bind_dn, pref_password;
     public int pref_port;
+    //create a new, unestablished connection.
     LDAPConnection c;
+    //variables holding values inserted by user
     String username, password;
     Toolbar toolbar;
-    EditText email, password2;
-    ImageButton signin;
-    Button signup;
+    //ui objects for username and password
+    EditText editTextUsername, editTextPassword;
+    //ui object for logging in
+    ImageButton imageButtonLogin;
+    //ui object for password reset
+    Button buttonResetPassword;
 
     /**
-     * @return Dn of who is connected.
+     * @return Dn of who is logged in
      */
     public static String getDN() {
         return dn;
@@ -64,28 +70,28 @@ public class MainActivity extends AppCompatActivity {
         deleteDatabase(DatabaseHelper.DB_NAME);
 
         toolbar = findViewById(R.id.toolbar);
-        email = findViewById(R.id.email);
-        password2 = findViewById(R.id.password2);
-        signin = findViewById(R.id.signin);
-        signup = findViewById(R.id.signup);
+        editTextUsername = findViewById(R.id.username);
+        editTextPassword = findViewById(R.id.password);
+        imageButtonLogin = findViewById(R.id.signin);
+        buttonResetPassword = findViewById(R.id.reset_password);
 
-        signin.setEnabled(false);
+        imageButtonLogin.setVisibility(View.INVISIBLE);
 
-        if (checkPermission()) signin.setEnabled(true);
+        if (checkPermission()) imageButtonLogin.setVisibility(View.VISIBLE);
         else requestPermission();
 
         //Setting default values
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false);
 
-        email.setText("avescovi");
-        password2.setText("12345678");
+        editTextUsername.setText("avescovi");
+        editTextPassword.setText("12345678");
 
-        signin.setOnClickListener(new View.OnClickListener() {
+        imageButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                username = email.getText().toString().trim();
-                password = password2.getText().toString();
+                username = editTextUsername.getText().toString().trim();
+                password = editTextPassword.getText().toString();
 
                 progressDialog = new ProgressDialog(MainActivity.this);
                 progressDialog.setTitle(R.string.logging_in);
@@ -135,8 +141,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
-                signin.setEnabled(true);
-                // main logic
+                imageButtonLogin.setVisibility(View.VISIBLE);
             } else {
                 Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -148,25 +153,39 @@ public class MainActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int which) {
                                         requestPermission();
                                     }
-                                });
+                                }
+                        );
                     }
                 }
             }
         }
     }
 
+    /**
+     * Inflate the menu; this adds items to the action bar if it is present.
+     * instantiate menu XML files into Menu objects.
+     *
+     * @param menu Menu object to instantiate XML files
+     * @return true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * Handle action bar item clicks here. The action bar will
+     * automatically handle clicks on the Home/Up button, so long
+     * as you specify a parent activity in AndroidManifest.xml.
+     *
+     * @param item MenuItem
+     * @return true
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+/*
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
@@ -175,13 +194,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+*/
+        switch (item.getItemId()) {
+
+            case R.id.action_settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                return true;
+
+            case R.id.action_update:
+                startActivity(new Intent(MainActivity.this, UpdateActivity.class));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
      * Method to authenticate the user to AD through LDAP.
      * In order to make the authentication let's try to find it
      * while binding an admin user
-     *
      * @param username username to authenticate
      * @param password password to authenticate
      * @throws LDAPException Invalid credentials
@@ -195,7 +225,6 @@ public class MainActivity extends AppCompatActivity {
         SearchResult sr = c.search(pref_base_dn, SearchScope.SUB, searchForUserFilter);
 
         if (sr.getEntryCount() == 0) {
-            Log.d(LOG_TAG_MainActivity, "Combinazione utente/password errata.");
             MainActivity.this.runOnUiThread(new Runnable() {
                 public void run() {
                     Toast.makeText(MainActivity.this, "Combinazione utente/password errata.", Toast.LENGTH_SHORT).show();
@@ -205,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
             dn = sr.getSearchEntries().get(0).getDN();
             try {
                 c = new LDAPConnection(pref_address, pref_port, dn, password);
-                Log.d(LOG_TAG_MainActivity, "Login successful: " + dn);
                 MainActivity.this.runOnUiThread(new Runnable() {
                     public void run() {
                         Toast.makeText(MainActivity.this, "Accesso eseguito", Toast.LENGTH_SHORT).show();
@@ -215,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             } catch (LDAPException e) {
                 if (e.getResultCode() == ResultCode.INVALID_CREDENTIALS) {
-                    Log.d(LOG_TAG_MainActivity, "LDAPException: " + e.getMessage());
                     MainActivity.this.runOnUiThread(new Runnable() {
                         public void run() {
                             Toast.makeText(MainActivity.this, "Combinazione utente/password errata.", Toast.LENGTH_SHORT).show();
@@ -229,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Method to show a message to the user who denied permission to camera
-     *
      * @param okListener DialogInterface.OnClickListener
      */
     private void showMessageOKCancel(DialogInterface.OnClickListener okListener) {

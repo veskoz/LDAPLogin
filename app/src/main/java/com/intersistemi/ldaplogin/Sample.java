@@ -1,12 +1,12 @@
 package com.intersistemi.ldaplogin;
 
-public class Name {
+public class Sample {
     private final String barcode;
     private final int status;
     private final String ldap_user;
     private final long time;
 
-    public Name(String barcode, int status, String ldap_user, long time) {
+    public Sample(String barcode, int status, String ldap_user, long time) {
         this.barcode = barcode;
         this.status = status;
         this.ldap_user = ldap_user;

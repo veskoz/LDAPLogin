@@ -8,9 +8,9 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:text="@string/name"
+        android:id="@+id/textViewSample"
         android:layout_alignParentLeft="true"
-        android:id="@+id/textViewName"
+        android:text="@string/sample"
         android:textColor="@color/colorWhite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -8,9 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    //Constants for Database name, table name, and column names
+    //Constants for Database name, table name, and column samples
     public static final String DB_NAME = "android";
-    public static final String TABLE_NAME = "names";
+    public static final String TABLE_NAME = "samples";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_BARCODE = "barcode";
     public static final String COLUMN_STATUS = "status";
@@ -36,25 +36,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_TIME + " INTEGER "
                 + ");";
         db.execSQL(sql);
-        //CREATE TABLE names(id INTEGER PRIMARY KEY AUTOINCREMENT, barcode VARCHAR, status TINYINT, ldap_user VARCHAR, time INTEGER );
+        //CREATE TABLE samples(id INTEGER PRIMARY KEY AUTOINCREMENT, barcode VARCHAR, status TINYINT, ldap_user VARCHAR, time INTEGER );
     }
 
     //upgrading the database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String sql = "DROP TABLE IF EXISTS Persons";
+        String sql = "DROP TABLE IF EXISTS " + TABLE_NAME;
         db.execSQL(sql);
         onCreate(db);
     }
 
-    /*
-     * This method is taking two arguments
-     * first one is the name that is to be saved
-     * second one is the status
-     * 0 means the name is synced with the server
-     * 1 means the name is not synced with the server
-     * */
-    public void addName(String barcode, int status, String ldap_user, long time) {
+    /**
+     * Method to add sample to local database
+     *
+     * @param barcode   barcpde to add
+     * @param status    status to add 0 means unsynced; 1 means synced
+     * @param ldap_user ldap_user to add
+     * @param time      unix timestamp in milliseconds
+     */
+    public void addSample(String barcode, int status, String ldap_user, long time) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
 
@@ -67,13 +68,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    /*
-     * This method taking two arguments
-     * first one is the id of the name for which
-     * we have to update the sync status
-     * and the second one is the status that will be changed
-     * */
-    public void updateNameStatus(int id, int status, String ldap_user, long time) {
+    /**
+     * this metod will update the sync status
+     *
+     * @param id     of sample to update
+     * @param status status to update
+     */
+    public void updateSampleStatus(int id, int status) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_STATUS, status);
@@ -81,20 +82,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    /*
-     * this method will give us all the name stored in sqlite
-     * */
-    public Cursor getNames() {
+    /**
+     * @return this method will give us all the samples stored in sqlite
+     */
+    public Cursor getSamples() {
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + COLUMN_ID + " ASC;";
         return db.rawQuery(sql, null);
     }
 
-    /*
-     * this method is for getting all the unsynced name
-     * so that we can sync it with database
-     * */
-    public Cursor getUnsyncedNames() {
+    /**
+     * @return return all the unsynced sample
+     */
+    public Cursor getUnsyncedSamples() {
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_STATUS + " = 0;";
         return db.rawQuery(sql, null);

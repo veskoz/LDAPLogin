@@ -55,13 +55,13 @@
         android:background="@null"
         android:src="@drawable/ic_save_white_24dp"
         android:text="@string/save"
-        app:layout_constraintBottom_toTopOf="@+id/listViewNames"
-        app:layout_constraintEnd_toEndOf="@id/listViewNames"
+        app:layout_constraintBottom_toTopOf="@+id/listViewSamples"
+        app:layout_constraintEnd_toEndOf="@id/listViewSamples"
         app:layout_constraintTop_toBottomOf="@+id/surface_view"
         android:contentDescription="@string/save" />
 
     <ListView
-        android:id="@+id/listViewNames"
+        android:id="@+id/listViewSamples"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:scrollbars="vertical"

@@ -12,12 +12,10 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -27,7 +25,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -59,25 +56,37 @@ import static com.intersistemi.ldaplogin.Constants.REQUEST_CAMERA_PERMISSION;
 
 public class BarcodeActivity extends AppCompatActivity implements View.OnClickListener, NetworkStateReceiver.NetworkStateReceiverListener {
 
+    //progress dialog to show when user want to refresh list
     public ProgressDialog progressDialog;
     //database helper object
     public DatabaseHelper db;
-    //int mSomeMemberVariable = 123;
+    //object to use for calling some methods
+    public Utility utility;
+    //hold the values of the url to the php page which saves into the db
     private String pref_url_save_name;
+    //provides a dedicated drawing surface embedded inside the view hierarchy.
     private SurfaceView surfaceView;
+    //manages the camera in conjunction with an underlying Detector.
+    //this receives preview frames from the camera at a specified rate
+    //sending those frames to the detector as fast as it is able to process those frames.
     private CameraSource cameraSource;
+    //this class provides methods to play DTMF tones (ITU-T Recommendation Q.23)
+    //call supervisory tones (3GPP TS 22.001, CEPT)
+    //and proprietary tones (3GPP TS 31.111).
     private ToneGenerator toneGen1;
+    //show what has been scanned
     private TextView barcodeText;
+    //hold the value of the scan made with camera
     private String barcodeData;
-    private ListView listViewNames;
-    //List to store all the names
-    private List<Name> names;
-    //Broadcast receiver to know the sync status
+    //list to show all scans has been done
+    private ListView listViewSamples;
+    //list to store all the sample
+    private List<Sample> samples;
+    //broadcast receiver to know the sync status and network changes
     private BroadcastReceiver broadcastReceiver;
     private NetworkStateReceiver networkStateReceiver;
     //adapterobject for list view
-    private NameAdapter nameAdapter;
-    public Utility utility;
+    private Sampledapter sampledapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,56 +103,49 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
         pref_url_save_name = this.getResources().getString(R.string.url_save_name_value);
 
         db = new DatabaseHelper(this);
-        names = new ArrayList<>();
+        samples = new ArrayList<>();
 
         //View objects
         ImageButton buttonSave = findViewById(R.id.buttonSave);
-        listViewNames = findViewById(R.id.listViewNames);
+        listViewSamples = findViewById(R.id.listViewSamples);
         ImageButton buttonRefreshList = findViewById(R.id.refreshList);
 
-        //adding click listener to button
+        //adding click listener to buttons
         buttonSave.setOnClickListener(this);
         buttonRefreshList.setOnClickListener(this);
 
-        //calling the method to load all the stored names
-        loadNames();
+        //calling the method to load all the stored samples
+        loadSamples();
 
         //the broadcast receiver to update sync status
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-
-                //loading the names again
-                loadNames();
+                loadSamples();
             }
         };
 
-        pref_url_save_name = getResources().getString(R.string.url_save_name_value);
-
-        //registering the broadcast receiver to update sync status
+        //registering the broadcast receiver to update sync status and network checker
         registerReceiver(broadcastReceiver, new IntentFilter(DATA_SAVED_BROADCAST));
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
-
         this.registerReceiver(networkStateReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
         initialiseDetectorsAndSources();
     }
 
     @Override
     public void onResume() {
-        Log.d("TAG", "onResume");
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        Log.d("TAG", "onPause");
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        Log.d("TAG", "onDestroy");
         super.onDestroy();
         networkStateReceiver.removeListener(this);
         this.unregisterReceiver(networkStateReceiver);
@@ -151,19 +153,16 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void networkAvailable() {
-        Log.d("TAG", "network available");
         /* TODO: Your connection-oriented stuff here */
     }
 
     @Override
     public void networkUnavailable() {
-        Log.d("TAG", "network unavailable");
         /* TODO: Your disconnection-oriented stuff here */
     }
 
     @Override
     public void onBackPressed() {
-        Log.d("TAG", "onBackPressed");
         new AlertDialog.Builder(this)
                 .setTitle("Uscire?")
                 .setMessage("Uscire e tornare alla login?")
@@ -173,7 +172,6 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                     public void onClick(DialogInterface arg0, int arg1) {
                         BarcodeActivity.super.onBackPressed();
                         unregisterReceiver(broadcastReceiver);
-
                     }
                 }).create().show();
     }
@@ -183,7 +181,7 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
         switch (v.getId()) {
 
             case R.id.buttonSave:
-                saveNameToServer();
+                saveSampleToServer();
                 break;
 
             case R.id.refreshList:
@@ -193,7 +191,6 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                 progressDialog.setCancelable(false);
                 progressDialog.setIndeterminate(true);
                 progressDialog.show();
-                Log.d("TAG", "refreshing");
                 new MyTask(this).execute();
                 break;
 
@@ -202,6 +199,9 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
+    /**
+     * method to initialise detector,camera,surfaceview in order to start scanning
+     */
     private void initialiseDetectorsAndSources() {
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(com.google.android.gms.vision.barcode.Barcode.ALL_FORMATS)
@@ -250,17 +250,12 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                 if (barcodes.size() != 0) {
 
                     barcodeText.post(new Runnable() {
-
                         @Override
                         public void run() {
 
-                            if (barcodes.valueAt(0).email != null) {
+                            if (barcodes.valueAt(0).displayValue != null) {
                                 barcodeText.removeCallbacks(null);
-                                barcodeData = barcodes.valueAt(0).email.address;
-                            } else {
-
                                 barcodeData = barcodes.valueAt(0).displayValue;
-
                             }
                             barcodeText.setText(barcodeData);
                             toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
@@ -271,46 +266,46 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    /*
+    /**
      * this method will
-     * load the names from the database
+     * load the samples from the database
      * with updated sync status
-     * */
-    private void loadNames() {
-        names.clear();
-        Cursor cursor = db.getNames();
+     */
+    private void loadSamples() {
+        samples.clear();
+        Cursor cursor = db.getSamples();
         if (cursor.moveToFirst()) {
             do {
-                Name name = new Name(
+                Sample sample = new Sample(
                         cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_BARCODE)),
                         cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_STATUS)),
                         cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_LDAP_USER)),
                         cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_TIME))
                 );
-                names.add(name);
+                samples.add(sample);
             } while (cursor.moveToNext());
         }
-        nameAdapter = new NameAdapter(this, R.layout.names, names);
-        listViewNames.setAdapter(nameAdapter);
+        sampledapter = new Sampledapter(this, R.layout.samples, samples);
+        listViewSamples.setAdapter(sampledapter);
     }
 
-    /*
+    /**
      * this method will simply refresh the list
-     * */
+     */
     private void refreshList() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                nameAdapter.notifyDataSetChanged();
+                sampledapter.notifyDataSetChanged();
             }
         });
 
     }
 
-    /*
-     * this method is saving the name to ther server
-     * */
-    private void saveNameToServer() {
+    /**
+     * this method is saving the sample to the server on errors save to local db
+     */
+    private void saveSampleToServer() {
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Salvataggio...");
         progressDialog.show();
@@ -328,12 +323,12 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                             JSONObject obj = new JSONObject(response);
                             if (!obj.getBoolean("error")) {
                                 //if there is a success
-                                //storing the name to sqlite with status synced
-                                saveNameToLocalStorage(barcode, NAME_SYNCED_WITH_SERVER, ldap_user, time);
+                                //storing the sample to sqlite with status synced
+                                saveSampleToLocalStorage(barcode, NAME_SYNCED_WITH_SERVER, ldap_user, time);
                             } else {
                                 //if there is some error
-                                //saving the name to sqlite with status unsynced
-                                saveNameToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
+                                //saving the sample to sqlite with status unsynced
+                                saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -344,10 +339,11 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         progressDialog.dismiss();
-                        //on error storing the name to sqlite with status unsynced
-                        saveNameToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
+                        //on error storing the sample to sqlite with status unsynced
+                        saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
                     }
-                }) {
+                }
+        ) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
@@ -360,120 +356,49 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
-    //saving the name to local storage
-    private void saveNameToLocalStorage(String barcode, int status, String ldap_user, long time) {
+    /**
+     * saving the sample to local storage
+     *
+     * @param barcode   barcode to store
+     * @param status    status to store
+     * @param ldap_user ldap_user to store
+     * @param time      time to store
+     */
+    private void saveSampleToLocalStorage(String barcode, int status, String ldap_user, long time) {
         barcodeText.setText("");
-        db.addName(barcode, status, ldap_user, time);
-        Name n = new Name(barcode, status, ldap_user, time);
-        names.add(n);
+        db.addSample(barcode, status, ldap_user, time);
+        Sample n = new Sample(barcode, status, ldap_user, time);
+        samples.add(n);
         refreshList();
     }
 
-/*
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void iterateList() {
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-
-        //if there is a network
-        if (activeNetwork != null) {
-            //if connected to wifi or mobile data plan
-            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI || activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
-
-                //getting all the unsynced names
-                try (Cursor cursor = db.getUnsyncedNames()) {
-                    while (cursor.moveToNext()) {
-
-                        //calling the method to save the unsynced name to MySQL
-                        Log.d("TAG", " calling the method to save the unsynced name to MySQL");
-                        utility.saveName(
-                                cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID)),
-                                cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_BARCODE)),
-                                cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_LDAP_USER)),
-                                cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_TIME)),
-                                pref_url_save_name,db
-                        );
-                    }
-                }
-            }
-        }
-    }
-*/
-
-/*
-    public void saveName(final int id, final String barcode, String ldap_user, long time) {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, pref_url_save_name,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject obj = new JSONObject(response);
-                            if (!obj.getBoolean("error")) {
-                                //updating the status in sqlite
-                                db.updateNameStatus(id, Constants.NAME_SYNCED_WITH_SERVER, ldap_user, time);
-
-                                //sending the broadcast to refresh the list
-                                getApplicationContext().sendBroadcast(new Intent(Constants.DATA_SAVED_BROADCAST));
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                    }
-                }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("barcode", barcode);
-                params.put("ldap_user", ldap_user);
-                params.put("time", String.valueOf(time));
-                return params;
-
-            }
-        };
-        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
-    }
-*/
-
-    /*
-     * method taking two arguments
-     * name that is to be saved and id of the name from SQLite
-     * if the name is successfully sent
-     * we will update the status as synced in SQLite
-     * */
+    /**
+     * Async task to help showing progress dialog, iterating the list
+     * and send data to server
+     */
     private static class MyTask extends AsyncTask<Void, Void, String> {
         private WeakReference<BarcodeActivity> activityReference;
+
         // only retain a weak reference to the activity
         MyTask(BarcodeActivity context) {
             activityReference = new WeakReference<>(context);
         }
+
         @Override
-        protected void onPreExecute() { }
+        protected void onPreExecute() {
+        }
 
         @Override
         protected String doInBackground(Void... params) {
             activityReference.get().refreshList();
-            /*
-            First idea was to call connectivity_change in order to trigger the intent but
-            seems like Permission Denial: not allowed to send broadcast android.net.conn.CONNECTIVITY_CHANGE
-            Intent intent = new Intent("android.net.conn.CONNECTIVITY_CHANGE");
-            activityReference.get().sendBroadcast(intent);
-             */
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                activityReference.get().utility.iterateList(activityReference.get().db,activityReference.get().pref_url_save_name);
+                activityReference.get().utility.iterateList(activityReference.get().db, activityReference.get().pref_url_save_name);
             }
             return "task finished";
         }
 
         @Override
         protected void onPostExecute(String result) {
-            Log.d("TAG", "finshed");
-            // get a reference to the activity if it is still there
             BarcodeActivity activity = activityReference.get();
             if (activity == null || activity.isFinishing()) return;
             new Handler().postDelayed(new Runnable() {
@@ -482,12 +407,6 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                     activityReference.get().progressDialog.dismiss();
                 }
             }, 3000);
-            // modify the activity's UI
-            //TextView textView = activity.findViewById(R.id.textview);
-            //textView.setText(result);
-
-            // access Activity member variables
-            //activity.mSomeMemberVariable = 321;
         }
     }//end static class
 }//end class

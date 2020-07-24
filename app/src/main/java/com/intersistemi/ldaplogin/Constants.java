@@ -1,7 +1,7 @@
 package com.intersistemi.ldaplogin;
 
 public class Constants {
-
+    //a broadcast to know weather the data is synced or not
     public static final String DATA_SAVED_BROADCAST = "com.intersistemi.datasaved";
     public static final String LOG_TAG_MainActivity = "MainActivity";
 
