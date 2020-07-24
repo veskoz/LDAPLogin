@@ -13,6 +13,7 @@
     <string name="logging_in">Accesso in corso</string>
     <string name="refreshlist">Aggiornamento</string>
     <string name="acra_toast_text">L\'applicazione si è chiusa improvvisamente un report è stato inviato.</string>
+    <string name="update_json">https://raw.githubusercontent.com/veskoz/LDAPLogin/master/app/update.json</string>
 
     <!-- Menu -->
     <string name="settings">Impostazioni</string>

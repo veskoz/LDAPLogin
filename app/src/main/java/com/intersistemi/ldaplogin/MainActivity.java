@@ -280,8 +280,8 @@ public class MainActivity extends AppCompatActivity {
     private void update() {
         AppUpdater appUpdater = new AppUpdater(this)
                 .setDisplay(Display.NOTIFICATION)
-                .setUpdateFrom(UpdateFrom.GITHUB)
-                .setGitHubUserAndRepo("veskoz", "LDAPLogin")
+                .setUpdateFrom(UpdateFrom.JSON)
+                .setUpdateJSON(this.getString(R.string.update_json))
                 .setTitleOnUpdateAvailable("Aggiornamento disponibile")
                 .setContentOnUpdateAvailable("Un aggiornamento è disponibile!")
                 .setTitleOnUpdateNotAvailable("Aggiornamento non disponibile")
