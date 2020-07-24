@@ -1,0 +1,8 @@
+{
+  "latestVersion": "v0.2-alpha",
+  "url": "https://github.com/veskoz/LDAPLogin/releases/download/v0.2-alpha/LDAPLogin_v0.2-alpha.apk",
+  "releaseNotes": [
+    "code clean up and optimized",
+    "added UpdateActivity.java to test AppUpdater"
+  ]
+}
