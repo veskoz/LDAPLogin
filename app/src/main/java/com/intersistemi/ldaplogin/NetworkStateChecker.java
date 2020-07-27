@@ -12,25 +12,22 @@ public class NetworkStateChecker extends BroadcastReceiver {
 
     //hold the values of the url to the php page which saves into the db
     public String pref_url_save_name;
-    //context and database helper object
-    private Context context;
     //object to use for calling some methods
     Utility utility;
-    //database helper object
-    private DatabaseHelper db;
 
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        this.context = context;
-        utility = new Utility(this.context);
+        //context and database helper object
+        utility = new Utility(context);
         pref_url_save_name = context.getResources().getString(R.string.url_save_name_value);
 
-        db = new DatabaseHelper(context);
+        //database helper object
+        DatabaseHelper db = new DatabaseHelper(context);
 
-        utility.iterateList(db,pref_url_save_name);
+        utility.iterateList(db, pref_url_save_name);
 
     }
 }
