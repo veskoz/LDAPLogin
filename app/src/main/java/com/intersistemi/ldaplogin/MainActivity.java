@@ -25,6 +25,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
+import com.facebook.stetho.Stetho;
 import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.enums.Display;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
@@ -87,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
         editTextUsername.setText("avescovi");
         editTextPassword.setText("12345678");
+
+        Stetho.initializeWithDefaults(this);
 
         imageButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -204,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
      * Method to authenticate the user to AD through LDAP.
      * In order to make the authentication let's try to find it
      * while binding an admin user
+     *
      * @param username username to authenticate
      * @param password password to authenticate
      * @throws LDAPException Invalid credentials
@@ -248,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Method to show a message to the user who denied permission to camera
+     *
      * @param okListener DialogInterface.OnClickListener
      */
     private void showMessageOKCancel(DialogInterface.OnClickListener okListener) {
