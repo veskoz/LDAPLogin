@@ -17,9 +17,21 @@
         android:layout_alignParentStart="true"
         tools:ignore="RelativeOverlap" />
 
+    <TextView
+        android:id="@+id/textViewSampleStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewSample"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp"
+        android:text="@string/sample"
+        android:textColor="@color/colorWhite"
+        tools:ignore="RelativeOverlap" />
+
     <ImageView
-        android:layout_alignParentRight="true"
         android:id="@+id/imageViewStatus"
+        android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/status"
