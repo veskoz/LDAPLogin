@@ -21,6 +21,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.intersistemi.ldaplogin.Constants.NAME_NOT_SYNCED_WITH_SERVER;
+
 public class Utility {
 
     Context context;
@@ -70,7 +72,15 @@ public class Utility {
                             if (!obj.getBoolean("error")) {
                                 //updating the status in sqlite
                                 db.updateSampleStatus(id, Constants.NAME_SYNCED_WITH_SERVER);
-
+                                //sending the broadcast to refresh the list
+                                context.sendBroadcast(new Intent(Constants.DATA_SAVED_BROADCAST));
+                            } else {
+                                Log.d(Constants.LOG_TAG_BarcodeActivity, "message: " + obj.getString("message"));
+                                if (!obj.getString("message").isEmpty()) {
+                                    db.updateSampleStatus(id, Constants.ERROR_CODE);
+                                } else {
+                                    db.updateSampleStatus(id, NAME_NOT_SYNCED_WITH_SERVER);
+                                }
                                 //sending the broadcast to refresh the list
                                 context.sendBroadcast(new Intent(Constants.DATA_SAVED_BROADCAST));
                             }
@@ -117,7 +127,6 @@ public class Utility {
                 //getting all the unsynced samples
                 try (Cursor cursor = db.getUnsyncedSamples()) {
                     while (cursor.moveToNext()) {
-
                         //calling the method to save the unsynced sample to MySQL
                         Log.d("TAG", " calling the method to save the unsynced sample to MySQL");
                         saveSample(

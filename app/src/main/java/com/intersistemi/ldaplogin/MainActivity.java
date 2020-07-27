@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        deleteDatabase(DatabaseHelper.DB_NAME);
 
         toolbar = findViewById(R.id.toolbar);
         editTextUsername = findViewById(R.id.username);
@@ -85,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
         //Setting default values
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false);
+
+        editTextUsername.setText("avescovi");
+        editTextPassword.setText("12345678");
 
         imageButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override

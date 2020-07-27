@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -328,7 +329,12 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                             } else {
                                 //if there is some error
                                 //saving the sample to sqlite with status unsynced
-                                saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
+                                Log.d(Constants.LOG_TAG_BarcodeActivity, "message: " + obj.getString("message"));
+                                if (!obj.getString("message").isEmpty()) {
+                                    saveSampleToLocalStorage(barcode, Constants.ERROR_CODE, ldap_user, time);
+                                } else {
+                                    saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

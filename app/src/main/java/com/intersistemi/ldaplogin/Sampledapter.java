@@ -48,7 +48,7 @@ public class Sampledapter extends ArrayAdapter<Sample> {
         } else {
             relativeLayout.setBackgroundResource(R.drawable.background);
         }
-
+/*
         //if the synced status is 0 displaying
         //queued icon
         //else displaying synced icon
@@ -56,6 +56,18 @@ public class Sampledapter extends ArrayAdapter<Sample> {
             imageViewStatus.setBackgroundResource(R.drawable.ic_av_timer_24px);
         } else {
             imageViewStatus.setBackgroundResource(R.drawable.ic_done_24px);
+        }
+*/
+        switch (sample.getStatus()) {
+            case 0:
+                imageViewStatus.setBackgroundResource(R.drawable.ic_av_timer_24px);
+                break;
+            case 1:
+                imageViewStatus.setBackgroundResource(R.drawable.ic_done_24px);
+                break;
+            case 2:
+                imageViewStatus.setBackgroundResource(R.drawable.ic_error_white_24dp);
+                break;
         }
 
         return listViewItem;
