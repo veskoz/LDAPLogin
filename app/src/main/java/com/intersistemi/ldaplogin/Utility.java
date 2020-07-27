@@ -71,19 +71,17 @@ public class Utility {
                             JSONObject obj = new JSONObject(response);
                             if (!obj.getBoolean("error")) {
                                 //updating the status in sqlite
-                                db.updateSampleStatus(id, Constants.NAME_SYNCED_WITH_SERVER);
+                                db.updateSampleStatus(id, Constants.NAME_SYNCED_WITH_SERVER, obj.getString("message"));
                                 //sending the broadcast to refresh the list
-                                context.sendBroadcast(new Intent(Constants.DATA_SAVED_BROADCAST));
                             } else {
-                                Log.d(Constants.LOG_TAG_BarcodeActivity, "message: " + obj.getString("message"));
                                 if (!obj.getString("message").isEmpty()) {
-                                    db.updateSampleStatus(id, Constants.ERROR_CODE);
+                                    db.updateSampleStatus(id, Constants.ERROR_CODE, obj.getString("message"));
                                 } else {
-                                    db.updateSampleStatus(id, NAME_NOT_SYNCED_WITH_SERVER);
+                                    db.updateSampleStatus(id, NAME_NOT_SYNCED_WITH_SERVER, obj.getString("message"));
                                 }
-                                //sending the broadcast to refresh the list
-                                context.sendBroadcast(new Intent(Constants.DATA_SAVED_BROADCAST));
                             }
+                            //sending the broadcast to refresh the list
+                            context.sendBroadcast(new Intent(Constants.DATA_SAVED_BROADCAST));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -113,7 +111,6 @@ public class Utility {
      *
      * @param db  local db
      * @param url url to the php save that saves to the server's db
-     * @param url url to the php save that saves to the server's db
      */
     public void iterateList(DatabaseHelper db, String url) {
         ConnectivityManager cm = (ConnectivityManager) this.context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -128,7 +125,6 @@ public class Utility {
                 try (Cursor cursor = db.getUnsyncedSamples()) {
                     while (cursor.moveToNext()) {
                         //calling the method to save the unsynced sample to MySQL
-                        Log.d("TAG", " calling the method to save the unsynced sample to MySQL");
                         saveSample(
                                 cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_ID)),
                                 cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_BARCODE)),
