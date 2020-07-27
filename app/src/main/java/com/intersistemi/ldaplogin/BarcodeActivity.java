@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -281,7 +280,8 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                         cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_BARCODE)),
                         cursor.getInt(cursor.getColumnIndex(DatabaseHelper.COLUMN_STATUS)),
                         cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_LDAP_USER)),
-                        cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_TIME))
+                        cursor.getLong(cursor.getColumnIndex(DatabaseHelper.COLUMN_TIME)),
+                        cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_STATUS_TEXT))
                 );
                 samples.add(sample);
             } while (cursor.moveToNext());
@@ -325,15 +325,14 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                             if (!obj.getBoolean("error")) {
                                 //if there is a success
                                 //storing the sample to sqlite with status synced
-                                saveSampleToLocalStorage(barcode, NAME_SYNCED_WITH_SERVER, ldap_user, time);
+                                saveSampleToLocalStorage(barcode, NAME_SYNCED_WITH_SERVER, ldap_user, time, obj.getString("message"));
                             } else {
                                 //if there is some error
                                 //saving the sample to sqlite with status unsynced
-                                Log.d(Constants.LOG_TAG_BarcodeActivity, "message: " + obj.getString("message"));
                                 if (!obj.getString("message").isEmpty()) {
-                                    saveSampleToLocalStorage(barcode, Constants.ERROR_CODE, ldap_user, time);
+                                    saveSampleToLocalStorage(barcode, Constants.ERROR_CODE, ldap_user, time, obj.getString("message"));
                                 } else {
-                                    saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
+                                    saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time, obj.getString("message"));
                                 }
                             }
                         } catch (JSONException e) {
@@ -346,7 +345,7 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                     public void onErrorResponse(VolleyError error) {
                         progressDialog.dismiss();
                         //on error storing the sample to sqlite with status unsynced
-                        saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time);
+                        saveSampleToLocalStorage(barcode, NAME_NOT_SYNCED_WITH_SERVER, ldap_user, time, error.getMessage());
                     }
                 }
         ) {
@@ -365,15 +364,16 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
     /**
      * saving the sample to local storage
      *
-     * @param barcode   barcode to store
-     * @param status    status to store
-     * @param ldap_user ldap_user to store
-     * @param time      time to store
+     * @param barcode     barcode to store
+     * @param status      status to store
+     * @param ldap_user   ldap_user to store
+     * @param time        time to store
+     * @param status_text text explaining status to store
      */
-    private void saveSampleToLocalStorage(String barcode, int status, String ldap_user, long time) {
+    private void saveSampleToLocalStorage(String barcode, int status, String ldap_user, long time, String status_text) {
         barcodeText.setText("");
-        db.addSample(barcode, status, ldap_user, time);
-        Sample n = new Sample(barcode, status, ldap_user, time);
+        db.addSample(barcode, status, ldap_user, time, status_text);
+        Sample n = new Sample(barcode, status, ldap_user, time, status_text);
         samples.add(n);
         refreshList();
     }
@@ -413,6 +413,7 @@ public class BarcodeActivity extends AppCompatActivity implements View.OnClickLi
                     activityReference.get().progressDialog.dismiss();
                 }
             }, 3000);
+            activityReference.get().refreshList();
         }
     }//end static class
 }//end class
