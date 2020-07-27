@@ -16,6 +16,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_STATUS = "status";
     public static final String COLUMN_LDAP_USER = "ldap_user";
     public static final String COLUMN_TIME = "time";
+    public static final String COLUMN_STATUS_TEXT = "status_text";
+
 
     //database version
     private static final int DB_VERSION = 1;
@@ -33,10 +35,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_BARCODE + " VARCHAR, "
                 + COLUMN_STATUS + " TINYINT, "
                 + COLUMN_LDAP_USER + " VARCHAR, "
-                + COLUMN_TIME + " INTEGER "
+                + COLUMN_TIME + " INTEGER, "
+                + COLUMN_STATUS_TEXT + " VARCHAR "
                 + ");";
         db.execSQL(sql);
-        //CREATE TABLE samples(id INTEGER PRIMARY KEY AUTOINCREMENT, barcode VARCHAR, status TINYINT, ldap_user VARCHAR, time INTEGER );
     }
 
     //upgrading the database
@@ -50,12 +52,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Method to add sample to local database
      *
-     * @param barcode   barcpde to add
-     * @param status    status to add 0 means unsynced; 1 means synced
-     * @param ldap_user ldap_user to add
-     * @param time      unix timestamp in milliseconds
+     * @param barcode     barcpde to add
+     * @param status      status to add 0 means unsynced; 1 means synced
+     * @param ldap_user   ldap_user to add
+     * @param time        unix timestamp in milliseconds
+     * @param status_text text explaining status
      */
-    public void addSample(String barcode, int status, String ldap_user, long time) {
+    public void addSample(String barcode, int status, String ldap_user, long time, String status_text) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
 
@@ -63,6 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(COLUMN_STATUS, status);
         contentValues.put(COLUMN_LDAP_USER, ldap_user);
         contentValues.put(COLUMN_TIME, time);
+        contentValues.put(COLUMN_STATUS_TEXT, status_text);
 
         db.insert(TABLE_NAME, null, contentValues);
         db.close();
@@ -71,13 +75,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * this metod will update the sync status
      *
-     * @param id     of sample to update
-     * @param status status to update
+     * @param id          of sample to update
+     * @param status      status to update
+     * @param status_text text explaining status
      */
-    public void updateSampleStatus(int id, int status) {
+    public void updateSampleStatus(int id, int status, String status_text) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_STATUS, status);
+        contentValues.put(COLUMN_STATUS_TEXT, status_text);
         db.update(TABLE_NAME, contentValues, COLUMN_ID + "=" + id, null);
         db.close();
     }
@@ -96,7 +102,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public Cursor getUnsyncedSamples() {
         SQLiteDatabase db = this.getReadableDatabase();
-        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_STATUS + " = 0;";
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_STATUS + " != 1;";
         return db.rawQuery(sql, null);
     }
 }
