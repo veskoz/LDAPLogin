@@ -14,6 +14,9 @@
     <string name="refreshlist">Aggiornamento</string>
     <string name="acra_toast_text">L\'applicazione si è chiusa improvvisamente un report è stato inviato.</string>
     <string name="update_json">https://raw.githubusercontent.com/veskoz/LDAPLogin/master/app/update.json</string>
+    <string name="status_ok">OK!</string>
+    <string name="status_unsent">richiesta non ancora inviata</string>
+
 
     <!-- Menu -->
     <string name="settings">Impostazioni</string>
