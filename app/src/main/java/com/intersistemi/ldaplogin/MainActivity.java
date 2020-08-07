@@ -86,9 +86,6 @@ public class MainActivity extends AppCompatActivity {
         //Setting default values
         PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false);
 
-        editTextUsername.setText("avescovi");
-        editTextPassword.setText("12345678");
-
         Stetho.initializeWithDefaults(this);
 
         imageButtonLogin.setOnClickListener(new View.OnClickListener() {
