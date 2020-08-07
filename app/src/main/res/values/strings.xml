@@ -23,11 +23,11 @@
     <string name="update">Aggiorna</string>
 
     <!-- Default values for preferences -->
-    <string name="ldap_address_value">www.zflexldap.com</string>
+    <string name="ldap_address_value">10.170.24.61</string>
     <string name="ldap_port_value">389</string>
-    <string name="ldap_base_dn_value">dc=zflexsoftware,dc=com</string>
-    <string name="ldap_bind_dn_value">cn=ro_admin,ou=sysadmins,dc=zflexsoftware,dc=com</string>
-    <string name="ldap_bind_password_value">zflexpass</string>
+    <string name="ldap_base_dn_value">dc=example,dc=com</string>
+    <string name="ldap_bind_dn_value">cn=Manager,dc=example,dc=com</string>
+    <string name="ldap_bind_password_value">passw0rd</string>
     <string name="url_save_name_value">http://10.170.24.61/LDAPLogin_Server/saveName.php</string>
 
     <!-- Preference Titles -->
