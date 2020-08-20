@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void authenticate2(String username, String password) throws LDAPException {
         Filter searchForUserFilter = Filter.createORFilter(
-                Filter.createEqualityFilter("uid", username),
+                Filter.createEqualityFilter("sAMAccountName", username),
                 Filter.createEqualityFilter("mail", username)
         );
 
